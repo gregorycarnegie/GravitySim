@@ -57,9 +57,9 @@ con = ScrollBar("Confidence %", (1, 100), 'h', 50, "CONF")
 radio = []
 for n in range(len(utils.radio_choices)):
     if n == 0:
-        radio.append(Sg.Radio(utils.radio_choices[n], 1, default=True, key="CONVERT_" + str(n)))
+        radio.append(Sg.Radio(utils.radio_choices[n], 1, default=True, key=f"CONVERT_{str(n)}"))
     else:
-        radio.append(Sg.Radio(utils.radio_choices[n], 1, key="CONVERT_" + str(n)))
+        radio.append(Sg.Radio(utils.radio_choices[n], 1, key=f"CONVERT_{str(n)}"))
 
 frame2 = [wid.scroll(), hei.scroll(), pad.scroll(), gam.scroll(), fac.scroll(), con.scroll(), radio]
 
