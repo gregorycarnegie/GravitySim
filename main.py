@@ -15,7 +15,7 @@ if __name__ == "__main__":
     while True:
         event, values = window.read()
 
-        if event == Sg.WIN_CLOSED or event == 'Exit':
+        if event in [Sg.WIN_CLOSED, "Exit"]:
             break
         elif event == "About Face Cropper":
             ux.about_page()
@@ -26,9 +26,7 @@ if __name__ == "__main__":
             padding, confidence, face, gamma = values["PADDING"], values["CONF"], values["FACE"], values["GAMMA"]
             file_list = os.listdir(source)
             # Appending radio values to list
-            radio_values = []
-            for i in range(len(utils.radio_choices)):
-                radio_values.append(values["CONVERT_" + str(i)])
+            radio_values = [values[f"CONVERT_{str(i)}"] for i in range(len(utils.radio_choices))]
 
             v = 1
             for image in file_list:
@@ -39,6 +37,6 @@ if __name__ == "__main__":
                 utils.process(image, source, destination, padding, width, height, confidence, face, gamma, radio_values)
                 v += 1
                 val = int(100 * (v / len(file_list)))
-                window['progbar'].update_bar(val)
+                window["progbar"].update_bar(val)
 
             ux.finished()
