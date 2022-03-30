@@ -106,8 +106,7 @@ def intersect(v1, v2):
 
 def distance(pt1, pt2):
     """Returns the euclidean distance in 2D between 2 pts."""
-    distance_to = np.linalg.norm(pt2 - pt1)
-    return distance_to
+    return np.linalg.norm(pt2 - pt1)
 
 
 def gamma(img, correction):
@@ -191,16 +190,13 @@ def _determine_safe_zoom(img_h, img_w, x, y, w, h, percent_face):
     # Find out what zoom factor to use given self.aspect_ratio
     corners = itertools.product((x, x + w), (y, y + h))
     center = np.array([x + int(w / 2), y + int(h / 2)])
-    im = np.array(
-        [(0, 0), (0, img_h), (img_w, img_h), (img_w, 0), (0, 0)]
-    )  # image_corners
+    im = np.array([(0, 0), (0, img_h), (img_w, img_h), (img_w, 0), (0, 0)])  # image_corners
     image_sides = [(im[n], im[n + 1]) for n in range(4)]
-
     corner_ratios = [percent_face]  # Hopefully we use this one
     for c in corners:
         corner_vector = np.array([center, c])
         a = distance(*corner_vector)
-        intersects = list(intersect(corner_vector, side) for side in image_sides)
+        intersects = [intersect(corner_vector, side) for side in image_sides]
         for pt in intersects:
             if (pt >= 0).all() and (pt <= im[2]).all():  # if intersect within image
                 dist_to_pt = distance(center, pt)
@@ -252,11 +248,7 @@ def _crop_positions(img_h, img_w, x, y, w, h, percent_face, wide, high):
 
 
 def box_detect(img_path, padding, wide, high, conf, face_perc):
-    if isinstance(img_path, str):
-        img = open_file(img_path)
-    else:
-        img = img_path
-
+    img = open_file(img_path) if isinstance(img_path, str) else img_path
     # get width and height of the image
     h_, w_ = img.shape[:2]
 
@@ -274,7 +266,7 @@ def box_detect(img_path, padding, wide, high, conf, face_perc):
     top = padding
     bottom = padding
     conf = conf / 100
-    for i in range(0, output.shape[0]):
+    for i in range(output.shape[0]):
         # get the confidence
         confidence = output[i, 2]
         # if confidence is above 50%, then draw the surrounding box
@@ -300,9 +292,8 @@ def process(image, source, destination, padding, width, height, confidence, face
     # Save the cropped image with PIL if a face was detected
     if bounding_box is not None:
         vect0, vect1, vect2, vect3 = bounding_box  # Unpack corner coordinates
-        pic = Image.open(path)  # Open image
-        pic = reorient_image(pic)  # Check exif orientation and rotate accordingly
-        cropped_pic = pic.crop((vect2, vect0, vect3, vect1))  # pic
+        pic = reorient_image(Image.open(path))  # Open image and check exif orientation and rotate accordingly
+        cropped_pic = pic.crop((vect2, vect0, vect3, vect1))  # crop picture
         pic_array = cv2.cvtColor(np.array(cropped_pic), cv2.COLOR_BGR2RGB)  # Colour correct as Numpy array
         cropped_image = cv2.resize(pic_array, (int(width), int(height)), interpolation=cv2.INTER_AREA)
         cropped_image = gamma(cropped_image, user_gamma / 1000)
@@ -319,7 +310,5 @@ def process(image, source, destination, padding, width, height, confidence, face
         reject = destination + "\\" + "reject"
         if not os.path.exists(reject):
             os.mkdir(reject, mode=0o666)
-            to_file = reject + "\\" + image
-        else:
-            to_file = reject + "\\" + image
+        to_file = reject + "\\" + image
         shutil.copy(my_file, to_file)
