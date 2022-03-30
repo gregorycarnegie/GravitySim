@@ -6,7 +6,7 @@
 |__|   /__/     \__\ \______||_______| \______|| _| `._____| \______/  | _|      | _|      |_______|| _| `._____|
 _________________________________________________________________________________________________________________
 
-A fork of leblancfg/autocrop
+A fork of leblancfg/autocrop using DNNs instead of HAAR Cascade
 
 Compatible Filetypes:
 
