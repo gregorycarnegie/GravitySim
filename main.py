@@ -2,30 +2,31 @@ import numpy as np
 import pygame
 
 WHITE, YELLOW, BLUE, RED, DARK_GREY = (255, 255, 255), (255, 255, 0), (100, 149, 237), (188, 39, 50), (80, 78, 81)
-Grav, AU, TIME_STEP = 6.67408e-11, 1.495978707e11, 10 * 3600 * 12 / 10000
+GRAV, AU, TIME_STEP = 6.67408e-11, 1.495978707e11, 10 * 3_600 * 12 / 10_000
 SCALE = 30 / AU  # 1 AU = 100px
 
-
-def accel(pos, mass, G, softening):
+def accel(pos: np.random._generator.Generator,
+          mass: np.ndarray,
+          g: float=GRAV,
+          softening: float=0.001) -> np.ndarray:
     dx, dy, dz = [position.T - position for position in [pos[:, i:i+1] for i in range(3)]]
     inv_r3 = (dx ** 2 + dy ** 2 + dz ** 2 + softening ** 2) ** (-1.5)
-    return np.hstack([G * (coordinate * inv_r3) @ mass for coordinate in [dx, dy, dz]])
+    return np.hstack([g * (coordinate * inv_r3) @ mass for coordinate in [dx, dy, dz]])
 
-
-def nbody(n, trail):
+def nbody(n: int=128, trail: bool=False) -> None:
     pygame.init()
     WIDTH = HEIGHT = 2000
     colours = [WHITE, YELLOW, BLUE]
     WIN = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Planet Sim")
-    posgen, velgen, masgen = np.random.default_rng(233423), np.random.default_rng(456452), np.random.default_rng(553452)
+    pos_gen, vel_gen, mas_gen = (np.random.default_rng(x) for x in (233_423, 456_452, 553_452))
 
-    positions = posgen.standard_normal(size=(n, 3), dtype=np.float64) * AU * 100
-    vel = velgen.standard_normal(size=(n, 3), dtype=np.float64) * 5e7
-    masses = np.absolute(masgen.standard_normal(size=(n, 1), dtype=np.float64)) * 2e32
+    positions = pos_gen.standard_normal(size=(n, 3), dtype=np.float64) * AU * 100
+    vel = vel_gen.standard_normal(size=(n, 3), dtype=np.float64) * 5e7
+    masses = np.absolute(mas_gen.standard_normal(size=(n, 1), dtype=np.float64)) * 2e32
 
     positions[0] = vel[0] = np.zeros((1, 3))
-    masses[0] = 2e39
+    masses[0] = 2e39 # Mass od main body e.g. the Sun, Black Hole etc.
 
     run = True
     clock = pygame.time.Clock()
@@ -38,7 +39,7 @@ def nbody(n, trail):
     while run:
         if not trail:
             WIN.fill((0, 0, 0))
-        acc = accel(positions, masses, Grav, 0.001)
+        acc = accel(positions, masses)
         for i, planet in enumerate(positions):
             x, y = planet[:2] / AU + WIDTH * 0.5
             if i == 0:
@@ -55,7 +56,5 @@ def nbody(n, trail):
         t += TIME_STEP
         pygame.display.update()
 
-
 if __name__ == '__main__':
-    trail_line = True
-    nbody(128, trail_line)
+    nbody()
